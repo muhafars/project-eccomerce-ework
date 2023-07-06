@@ -23,9 +23,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
 //page
-app.use("/api", productRoute);
 //home
-app.use("/", async function (req, res, next) {
+app.use("/api", productRoute);
+app.get("/", async function (req, res, next) {
   try {
     res.render("index", {
       title: "Eduwork API Services",
