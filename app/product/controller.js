@@ -53,7 +53,10 @@ const Category = require("../category/model");
 const index = async function (req, res, next) {
   try {
     let { skip = 0, limit = 10 } = req.query;
-    let product = await Product.find().skip(parseInt(skip)).limit(parseInt(limit));
+    let product = await Product.find()
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .populate("category");
     return res.json(product);
   } catch (err) {
     next(err);
@@ -77,8 +80,8 @@ const destroy = async function (req, res, next) {
 };
 
 const update = async function (req, res, next) {
-  const id = req.params.id;
   try {
+    const id = req.params.id;
     let payload = req.body;
     let product = await Product.findById(id);
     //Category
