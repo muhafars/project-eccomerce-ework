@@ -3,6 +3,7 @@ const fs = require("fs");
 const config = require("../config");
 const Product = require("./model");
 const Category = require("../category/model");
+const Tag = require("../tag/model");
 
 // const view = async function (req, res, next) {
 //   try {
@@ -56,7 +57,8 @@ const index = async function (req, res, next) {
     let product = await Product.find()
       .skip(parseInt(skip))
       .limit(parseInt(limit))
-      .populate("category");
+      .populate("category")
+      .populate("tags");
     return res.json(product);
   } catch (err) {
     next(err);
@@ -91,6 +93,15 @@ const update = async function (req, res, next) {
         payload = { ...payload, category: category._id };
       } else {
         delete payload.category;
+      }
+    }
+    // tag relation
+    if (payload.tags && payload.tags.length > 0) {
+      let tags = await Tag.find({ name: { $in: payload.tags } });
+      if (tags.length > 0) {
+        payload = { ...payload, tags: tags.map(tag => tag._id) };
+      } else {
+        delete payload.tags;
       }
     }
 
@@ -156,6 +167,17 @@ const store = async function (req, res, next) {
         delete payload.category;
       }
     }
+    // -tag relation
+
+    if (payload.tags && payload.tags.length > 0) {
+      let tags = await Tag.find({ name: { $in: payload.tags } });
+      if (tags.length > 0) {
+        payload = { ...payload, tags: tags.map(tag => tag._id) };
+      } else {
+        delete payload.tags;
+      }
+    }
+
     if (req.file) {
       let tmp_path = req.file.path;
       let originalExt =

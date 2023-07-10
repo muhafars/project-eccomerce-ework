@@ -92,19 +92,20 @@ const view = async function (req, res, next) {
 };
 
 const destroy = async function (req, res, next) {
-  const id = req.params.id;
-
   try {
-    const tag = await Tags.findByIdAndREmove(id);
+    const id = req.params.id;
+    const tag = await Tags.findByIdAndRemove(id);
     res.json(tag);
   } catch (err) {
-    return res.json({
-      error: 1,
-      message: err.message,
-      fields: err.errors,
-    });
+    if (err && err.name === "ValidationError") {
+      return res.json({
+        error: 1,
+        message: err.message,
+        fields: err.errors,
+      });
+    }
+    next(err);
   }
-  next(err);
 };
 
 module.exports = { view, destroy, update, store };

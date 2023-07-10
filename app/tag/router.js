@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const tagController = require("./controller");
 router.get("/tags", tagController.view);
-router.get("/tag/:id", tagController.view);
+router.get("/tags/:id", tagController.view);
 router.post("/tags", tagController.store);
 router.put("/tags/:id", tagController.update);
 router.delete("/tags/:id", tagController.destroy);

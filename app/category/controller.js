@@ -21,7 +21,8 @@ const store = async function (req, res, next) {
 const update = async function (req, res, next) {
   try {
     let payload = req.body;
-    let category = await Categories.findByIdAndUpdate(req.params.id, payload, {
+    let id = req.params.id;
+    let category = await Categories.findByIdAndUpdate(id, payload, {
       new: true,
       runValidators: true,
     });

@@ -3,10 +3,10 @@ const { model, Schema } = mongoose;
 
 const tagSchema = Schema({
   name: {
-    type: "String",
+    type: String,
     minLength: [3, "Minimal panjang character 3 char"],
     maxLength: [20, "Maximum panjang charater 20"],
-    require: [true, "Nama tag harus terisi"],
+    required: [true, "Nama tag harus terisi"],
   },
 });
 
