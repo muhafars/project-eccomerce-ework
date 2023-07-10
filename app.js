@@ -8,6 +8,8 @@ const cors = require("cors");
 
 //-Import custom
 const productRoute = require("./app/product/router");
+const categoryRoute = require("./app/category/router");
+const tagRoute = require("./app/tag/router");
 //Initialize
 const app = express();
 
@@ -24,7 +26,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //page
 //home
-app.use("/api", productRoute);
+app.use("/api", productRoute, categoryRoute, tagRoute);
 app.get("/", async function (req, res, next) {
   try {
     res.render("index", {
