@@ -53,33 +53,37 @@ const Tags = require("../tag/model");
 
 const index = async function (req, res, next) {
   try {
-    let { skip = 0, limit = 10, q = "", category = "", tags = [] } = req.query;
+    const { skip = 0, limit = 10, q = "", category = "", tags = [] } = req.query;
+
     let criteria = {};
+
     if (q.length) {
-      criteria = {
-        ...criteria,
-        name: { $regex: `${q}`, $options: "i" },
-      };
+      criteria.name = { $regex: q, $options: "i" };
     }
+
     if (category.length) {
-      let categoryObj = await Category.findOne({ name: { $regex: `${category}`, $options: "i" } });
+      const categoryObj = await Category.findOne({ name: { $regex: category, $options: "i" } });
       if (categoryObj) {
-        criteria = { ...criteria, category: categoryObj._id };
+        criteria.category = categoryObj._id;
       }
     }
 
     if (tags.length) {
-      let tagsArr = await Tags.find({ $in: tags });
-      criteria = { ...criteria, tags: { $in: tagsArr.map(tag => tag._id) } };
+      const tagsArr = await Tags.find({ name: { $in: tags } });
+      criteria.tags = { $in: tagsArr.map(tag => tag._id) };
     }
 
-    console.log(criteria);
-    let product = await Product.find()
+    console.log("criteria:", criteria);
+    const count = await Product.find().countDocuments();
+    const products = await Product.find(criteria)
       .skip(parseInt(skip))
       .limit(parseInt(limit))
       .populate("category")
       .populate("tags");
-    return res.json(product);
+    return res.json({
+      data: products,
+      count,
+    });
   } catch (err) {
     next(err);
   }
@@ -106,7 +110,7 @@ const update = async function (req, res, next) {
   try {
     const id = req.params.id;
     let payload = req.body;
-    let product = await Product.findById(id);
+    const product = await Product.findById(id);
     //Category
     if (payload.category) {
       let category = await Category.findOne({ name: { $regex: payload.category, $options: "i" } });
