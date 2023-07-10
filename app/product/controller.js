@@ -3,7 +3,7 @@ const fs = require("fs");
 const config = require("../config");
 const Product = require("./model");
 const Category = require("../category/model");
-const Tag = require("../tag/model");
+const Tags = require("../tag/model");
 
 // const view = async function (req, res, next) {
 //   try {
@@ -53,7 +53,27 @@ const Tag = require("../tag/model");
 
 const index = async function (req, res, next) {
   try {
-    let { skip = 0, limit = 10 } = req.query;
+    let { skip = 0, limit = 10, q = "", category = "", tags = [] } = req.query;
+    let criteria = {};
+    if (q.length) {
+      criteria = {
+        ...criteria,
+        name: { $regex: `${q}`, $options: "i" },
+      };
+    }
+    if (category.length) {
+      let categoryObj = await Category.findOne({ name: { $regex: `${category}`, $options: "i" } });
+      if (categoryObj) {
+        criteria = { ...criteria, category: categoryObj._id };
+      }
+    }
+
+    if (tags.length) {
+      let tagsArr = await Tags.find({ $in: tags });
+      criteria = { ...criteria, tags: { $in: tagsArr.map(tag => tag._id) } };
+    }
+
+    console.log(criteria);
     let product = await Product.find()
       .skip(parseInt(skip))
       .limit(parseInt(limit))
@@ -64,6 +84,7 @@ const index = async function (req, res, next) {
     next(err);
   }
 };
+
 const destroy = async function (req, res, next) {
   try {
     const id = req.params.id;
@@ -97,7 +118,7 @@ const update = async function (req, res, next) {
     }
     // tag relation
     if (payload.tags && payload.tags.length > 0) {
-      let tags = await Tag.find({ name: { $in: payload.tags } });
+      let tags = await Tags.find({ name: { $in: payload.tags } });
       if (tags.length > 0) {
         payload = { ...payload, tags: tags.map(tag => tag._id) };
       } else {
@@ -160,7 +181,7 @@ const store = async function (req, res, next) {
     let payload = req.body;
 
     if (payload.category) {
-      let category = await Category.findOne({ name: { $regex: payload.category, $options: "i" } });
+      let category = await Category.find({ name: { $regex: payload.category, $options: "i" } });
       if (category) {
         payload = { ...payload, category: category._id };
       } else {
@@ -170,7 +191,7 @@ const store = async function (req, res, next) {
     // -tag relation
 
     if (payload.tags && payload.tags.length > 0) {
-      let tags = await Tag.find({ name: { $in: payload.tags } });
+      let tags = await Tags.find({ name: { $in: payload.tags } });
       if (tags.length > 0) {
         payload = { ...payload, tags: tags.map(tag => tag._id) };
       } else {
