@@ -10,6 +10,8 @@ const cors = require("cors");
 const productRoute = require("./app/product/router");
 const categoryRoute = require("./app/category/router");
 const tagRoute = require("./app/tag/router");
+//-auth
+const authRoute = require("./app/auth/router");
 //Initialize
 const app = express();
 
@@ -26,6 +28,7 @@ app.use(express.static(path.join(__dirname, "public")));
 
 //page
 //home
+app.use("/auth", authRoute);
 app.use("/api", productRoute, categoryRoute, tagRoute);
 app.get("/", async function (req, res, next) {
   try {
