@@ -7,6 +7,7 @@ const logger = require("morgan");
 const cors = require("cors");
 
 //-Import custom
+//-product
 const productRoute = require("./app/product/router");
 const categoryRoute = require("./app/category/router");
 const tagRoute = require("./app/tag/router");

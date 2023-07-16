@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
-const AutoIncrement = require("mongoose-sequence")(mongoose);
 const bcrypt = require("bcrypt");
+
 const userSchema = Schema(
   {
     full_name: {
@@ -12,11 +12,19 @@ const userSchema = Schema(
     },
     customer_id: {
       type: Number,
+      unique: true,
     },
     email: {
       type: String,
       required: [true, "Alamat email harus di isi"],
       maxLength: [255, "Panjang maksimum email character 255"],
+      validate: {
+        validator: function (value) {
+          const EMAIL_RE = /^([\w-\.]+@[\w-]+\.)+[\w-]{2,4}?$/;
+          return EMAIL_RE.test(value);
+        },
+        message: `harus merupakan email yang valid`,
+      },
     },
     password: {
       type: String,
@@ -33,43 +41,27 @@ const userSchema = Schema(
   { timestamps: true }
 );
 
-/**
- *- Use async function for validate email address
-userSchema.path("email").validate(async function (value) {
-  try {
-    const EMAIL_RE = /^([\w-]+@[\w-]+\.)+[\w-]{2,4}?$/;
-    return EMAIL_RE.test(value);
-  } catch (err) {
-    throw err;
-  }
-}, attr => `${attr.value} harus merupakan email yang valid`);
- */
-
-userSchema.path("email").validate(
-  function (value) {
-    const EMAIL_RE = /^([\w-]+@[\w-]+\.)+[\w-]{2,4}?$/;
-    return EMAIL_RE.test(value);
-  },
-  attr => `${attr.value} harus merupakan email yang valid`
-);
-
-userSchema.path("email").validate(
-  async function (value) {
-    try {
-      const count = await this.model("User").count({ email: value });
-      return !count;
-    } catch (err) {
-      throw err;
-    }
-  },
-  attr => `${attr.value} sudah terdaftar`
-);
-
 const HASH_ROUND = 10;
 userSchema.pre("save", function (next) {
   this.password = bcrypt.hashSync(this.password, HASH_ROUND);
   next();
 });
 
-userSchema.plugin(AutoIncrement, { inc_field: "customer_id" });
+userSchema.pre("save", async function (next) {
+  if (!this.customer_id) {
+    try {
+      const User = model("User");
+      const lastUser = await User.findOne().sort({ customer_id: -1 });
+      if (lastUser) {
+        this.customer_id = lastUser.customer_id + 1;
+      } else {
+        this.customer_id = 1;
+      }
+    } catch (error) {
+      next(error);
+    }
+  }
+  next();
+});
+
 module.exports = model("User", userSchema);
