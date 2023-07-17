@@ -73,7 +73,7 @@ const index = async function (req, res, next) {
       criteria.tags = { $in: tagsArr.map(tag => tag._id) };
     }
 
-    console.log("criteria:", criteria);
+    // console.log("criteria:", criteria);
     const count = await Product.find().countDocuments();
     const products = await Product.find(criteria)
       .skip(parseInt(skip))

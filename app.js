@@ -9,12 +9,13 @@ const cors = require("cors");
 const { decodeToken } = require("./middlewares");
 
 //-Import custom
+//-auth
+const authRoute = require("./app/auth/router");
 //-product
 const productRoute = require("./app/product/router");
 const categoryRoute = require("./app/category/router");
 const tagRoute = require("./app/tag/router");
-//-auth
-const authRoute = require("./app/auth/router");
+const deliveryAddressRoute = require("./app/deliveryAddress/router");
 //Initialize
 const app = express();
 
@@ -33,7 +34,7 @@ app.use(decodeToken());
 //page
 //home
 app.use("/auth", authRoute);
-app.use("/api", productRoute, categoryRoute, tagRoute);
+app.use("/api", productRoute, categoryRoute, tagRoute, deliveryAddressRoute);
 app.get("/", async function (req, res, next) {
   try {
     res.render("index", {
