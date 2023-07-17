@@ -1,7 +1,7 @@
 const jwt = require("jsonwebtoken");
 const config = require("../app/config");
 const User = require("../app/user/model");
-const { getToken } = require("../utils");
+const { getToken, policyFor } = require("../utils");
 
 function decodeToken() {
   return async function (req, res, next) {
@@ -29,4 +29,18 @@ function decodeToken() {
   };
 }
 
-module.exports = { decodeToken };
+// middlewares cek hak akses
+function policies_check(action, subject) {
+  return function (req, res, next) {
+    let policy = policyFor(req.user);
+    if (!policy.can(action, subject)) {
+      return res.json({
+        error: 1,
+        message: `You are not allowed to ${action} ${subject}`,
+      });
+    }
+    next();
+  };
+}
+
+module.exports = { decodeToken, policies_check };
