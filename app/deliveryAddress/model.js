@@ -1,5 +1,5 @@
-const { ObjectId } = require("mongodb");
-const { Schema, model } = require("mongoose");
+const mongoose = require("mongoose");
+const { model, Schema } = mongoose;
 
 const deliveryAddressSchema = Schema(
   {

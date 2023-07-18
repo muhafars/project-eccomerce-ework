@@ -8,6 +8,12 @@
 *			controller.js
 *			model.js
 *			router.js
+##### new
+*		cart
+*			controller.js
+*			router.js
+*		cart-item
+*			model.js
 *		deliveryAddress
 *			controller.js
 *			model.js
