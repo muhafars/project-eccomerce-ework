@@ -16,7 +16,9 @@ const categoryRoute = require("./app/category/router");
 const tagRoute = require("./app/tag/router");
 const deliveryAddressRoute = require("./app/deliveryAddress/router");
 const cartRoute = require("./app/cart/router");
+const orderRoute = require("./app/order/router");
 const authRoute = require("./app/auth/router");
+
 //Initialize
 const app = express();
 
@@ -35,7 +37,7 @@ app.use(decodeToken());
 //page
 //home
 app.use("/auth", authRoute);
-app.use("/api", productRoute, categoryRoute, tagRoute, deliveryAddressRoute, cartRoute);
+app.use("/api", productRoute, categoryRoute, tagRoute, deliveryAddressRoute, cartRoute, orderRoute);
 app.get("/", async function (req, res, next) {
   try {
     res.render("index", {
