@@ -1,4 +1,6 @@
+const { subject } = require("@casl/ability");
 const DeliveryAddress = require("./model");
+const { policyFor } = require("../../utils");
 
 const store = async function (req, res, next) {
   try {
@@ -24,9 +26,18 @@ const store = async function (req, res, next) {
 
 const update = async function (req, res, next) {
   try {
-    const payload = req.body;
-    const user_id = req.user._id;
-    const address = await DeliveryAddress.findByIdAndUpdate(user_id, payload, {
+    const { _id, ...payload } = req.body;
+    const id = req.params;
+    let address = await DeliveryAddress.findById();
+    const subjectAddress = subject("DeliveryAddress", { ...address, user_id: address.user });
+    const policy = policyFor(req.user);
+    if (!policy.can("update", subjectAddress)) {
+      return res.json({
+        error: 1,
+        message: "You are not allowed to modify this resource",
+      });
+    }
+    address = await DeliveryAddress.findByIdAndUpdate(id, payload, {
       new: true,
       runValidators: true,
     });
@@ -45,42 +56,13 @@ const update = async function (req, res, next) {
 
 const index = async function (req, res, next) {
   try {
-    const { search } = req.query;
-    const users_id = req.user._id;
-    // search by users id
-    if (id) {
-      try {
-        const address = await DeliveryAddress.findById(users_id);
-        res.json(address);
-      } catch (err) {
-        if (err && err.name === "ValidationError") {
-          return res.json({
-            error: 1,
-            message: err.message,
-            fields: err.errors,
-          });
-        }
-        next(err);
-      }
-    }
-    //search by query
-    else if (search) {
-      const address = await DeliveryAddress.find({
-        name: { $regex: search, $options: "i" },
-      });
-      if (category.length === 0) {
-        return res.json({
-          error: 1,
-          message: "Alamat tidak ditemukan",
-        });
-      }
-      res.json(address);
-    }
-    // show all
-    else {
-      const address = await DeliveryAddress.find();
-      return res.json(address);
-    }
+    const { skip = 0, limit = 10 } = req.query;
+    const count = await DeliveryAddress.find({ user: user._id }).countDocument();
+    const address = await DeliveryAddress.find({ user: req.user._id })
+      .skip(parseInt(skip))
+      .limit(parseInt(limit))
+      .sort("-createdAt");
+    return res.json({ data: address, count });
   } catch (err) {
     if (err && err.name === "ValidationError") {
       res.json({
@@ -95,8 +77,17 @@ const index = async function (req, res, next) {
 
 const destroy = async function (req, res, next) {
   try {
-    const users_id = req.user._id;
-    const address = await DeliveryAddress.findByIdAndRemove(users_id);
+    const { id } = req.params;
+    let address = await DeliveryAddress.findById(id);
+    const subjectAddress = subject("DeliveryAddress", { ...address, user_id: address.user });
+    const policy = policyFor(req.user);
+    if (!policy.can("delete", subjectAddress)) {
+      return res.json({
+        error: 1,
+        message: "You are not allowed to delete this resource",
+      });
+    }
+    address = await DeliveryAddress.findByIdAndDelete(id);
     res.json(address);
   } catch (err) {
     if (err && err.name === "ValidationError") {

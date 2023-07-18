@@ -8,15 +8,7 @@ router.post(
   policies_check("create", "DeliveryAddress"),
   deliveryAddressController.store
 );
-router.put(
-  "/delivery/:id",
-  policies_check("update", "DeliveryAddress"),
-  deliveryAddressController.update
-);
-router.delete(
-  "/delivery/:id",
-  policies_check("delete", "DeliveryAddress"),
-  deliveryAddressController.destroy
-);
+router.put("/delivery/:id", deliveryAddressController.update);
+router.delete("/delivery/:id", deliveryAddressController.destroy);
 
 module.exports = router;
