@@ -29,7 +29,7 @@ const store = async function (req, res, next) {
       user: req.user._id,
     });
     const orderItems = await OrderItem.insertMany(
-      items.map(item => ({
+      item.map(item => ({
         ...item,
         name: item.product.name,
         qty: parseInt(item.qty),

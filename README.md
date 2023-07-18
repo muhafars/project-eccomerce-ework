@@ -8,7 +8,6 @@
 *			controller.js
 *			model.js
 *			router.js
-##### new
 *		cart
 *			controller.js
 *			router.js
@@ -18,6 +17,9 @@
 *			controller.js
 *			model.js
 *			router.js
+##### new
+*		order
+*			model.js
 *		product
 *			controller.js
 *			model.js
